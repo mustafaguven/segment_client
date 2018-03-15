@@ -124,3 +124,4 @@ data/
 src/main/java/
 src/main/resources/
 src/test/
+/src/main/kotlin/assets/intensity_son.json
