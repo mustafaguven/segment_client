@@ -1,10 +1,6 @@
 package network
 
 import domain.SegmentData
-import domain.TokenResponse
-import java.awt.print.Book
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.Retrofit
 
 
 class SegmentRepository : IbbRepository() {
@@ -17,8 +13,9 @@ class SegmentRepository : IbbRepository() {
             val segmentDataResource = getRetrofit(SEGMENT_URL).create(SegmentService::class.java)
             val theToken = token ?: fileUtil.getToken()
             println("$BASE_URL bekleniyor")
-            val segmentList = segmentDataResource.getSegments(theToken).execute()
-            return segmentList.body()
+            val response = segmentDataResource.getSegments(theToken).execute()
+            checkError(response)
+            return response.body()
         } catch (e: Exception) {
             when (tryout) {
                 in 1..3 -> {
@@ -34,4 +31,6 @@ class SegmentRepository : IbbRepository() {
             null
         }
     }
+
+
 }

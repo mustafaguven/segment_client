@@ -1,10 +1,11 @@
 package network
 
 import file.FileUtil
+import okhttp3.OkHttpClient
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import okhttp3.OkHttpClient
 
 
 abstract class IbbRepository {
@@ -25,5 +26,12 @@ abstract class IbbRepository {
                     .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
+
+    protected fun <T> checkError(response: Response<T>) {
+        if (response.errorBody() != null) {
+            println(response.errorBody().string())
+            System.exit(-1)
+        }
+    }
 
 }
