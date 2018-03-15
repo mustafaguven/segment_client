@@ -19,6 +19,7 @@ val segmentRepository by lazy { SegmentRepository() }
 val fileUtil by lazy { FileUtil() }
 
 val addedRoadTypes = mutableListOf<Int>()
+var creationType: CreationType = CreationType.BY_ROAD_TYPE
 
 fun main(args: Array<String>) {
     if (args.isNotEmpty()) {
@@ -29,10 +30,19 @@ fun main(args: Array<String>) {
                 } else {
                     PATH
                 }
+
+                if (args.size == 3) {
+                    creationType = CreationType.valueOf(args[2])
+                }
                 createDBForMapViaLocalPath()
             }
             "REST"
-            -> createDBFromRest()
+            -> {
+                if (args.size == 2) {
+                    creationType = CreationType.valueOf(args[1])
+                }
+                createDBFromRest()
+            }
         }
     } else {
         createDBFromRest()
@@ -51,6 +61,17 @@ fun createDBFromRest() {
     segmentList!!.sortBy { it.roadType }
     println("RoadType'a gore yeniden siralandi")
 
+    when(creationType){
+        CreationType.BY_ROAD_TYPE -> createDBByRoadType(segmentList)
+        CreationType.BY_ZOOM_LEVEL -> createDBByZoomLevel(segmentList)
+    }
+
+
+    println("Islem tamamlandi")
+    System.exit(0)
+}
+
+fun createDBByZoomLevel(segmentList: Array<SegmentData>) {
     val segmentMap = SegmentMap()
     for (i in segmentList) {
         if (!addedRoadTypes.contains(i.roadType)) {
@@ -62,11 +83,20 @@ fun createDBFromRest() {
         }
         segmentMap[i.segmentId] = i
     }
+}
 
-    addToCouchbaseLiteByRoadType(addedRoadTypes.size - 1, segmentMap)
+private fun createDBByRoadType(segmentList: Array<SegmentData>) {
+    val segmentMap = SegmentMap()
+    for (i in segmentList) {
+        if (!addedRoadTypes.contains(i.roadType)) {
+            addedRoadTypes.add(i.roadType)
 
-    println("Islem tamamlandi")
-    System.exit(0)
+            if (addedRoadTypes.size > 1) {
+                addToCouchbaseLiteByRoadType(addedRoadTypes.size - 2, segmentMap)
+            }
+        }
+        segmentMap[i.segmentId] = i
+    }
 }
 
 private fun addToCouchbaseLiteByRoadType(roadTypeIndex: Int, segmentMap: SegmentMap) {
@@ -102,6 +132,8 @@ private fun createDBForMapViaLocalPath() {
     couchbaseUtil.upsertSegmentDocument(1, segmentMap)
 
 }
+
+enum class CreationType { BY_ZOOM_LEVEL, BY_ROAD_TYPE }
 
 
 

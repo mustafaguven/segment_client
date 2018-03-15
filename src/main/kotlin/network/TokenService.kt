@@ -1,9 +1,7 @@
 package network
 
 import config.Config
-import domain.SegmentData
 import domain.TokenResponse
-import io.reactivex.Observable
 import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
