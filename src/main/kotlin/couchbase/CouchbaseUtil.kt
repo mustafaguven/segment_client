@@ -2,7 +2,7 @@ package couchbase
 
 import com.couchbase.lite.*
 import com.fasterxml.jackson.databind.ObjectMapper
-import domain.SegmentData
+import domain.SegmentDataIn
 import domain.SegmentMap
 
 class CouchbaseUtil {
@@ -48,7 +48,7 @@ class CouchbaseUtil {
         }
     }
 
-    fun upsertSegmentDocument(payload: SegmentData) {
+    fun upsertSegmentDocument(payload: SegmentDataIn) {
         val props = objectMapper.convertValue(payload, Map::class.java)
         upsertDocument(props as MutableMap<String, Any>, payload.segmentId.toString())
     }

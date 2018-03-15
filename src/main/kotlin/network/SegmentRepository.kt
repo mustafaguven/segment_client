@@ -1,6 +1,6 @@
 package network
 
-import domain.SegmentData
+import domain.SegmentDataIn
 
 
 class SegmentRepository : IbbRepository() {
@@ -8,7 +8,7 @@ class SegmentRepository : IbbRepository() {
     var tryout = 1
 
     @Throws(Exception::class)
-    fun getSegments(token: String? = null): Array<SegmentData>? {
+    fun getSegments(token: String? = null): Array<SegmentDataIn>? {
         return try {
             val segmentDataResource = getRetrofit(SEGMENT_URL).create(SegmentService::class.java)
             val theToken = token ?: fileUtil.getToken()

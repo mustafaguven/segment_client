@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import couchbase.CouchbaseUtil
-import domain.SegmentData
+import domain.SegmentDataIn
 import domain.SegmentMap
 import file.FileUtil
 import network.SegmentRepository
@@ -16,7 +16,7 @@ import java.io.FileInputStream
 import java.io.FileWriter
 import java.io.InputStreamReader
 
-private val segmentListToken = object : TypeToken<Array<SegmentData>>() {}.type
+private val segmentListToken = object : TypeToken<Array<SegmentDataIn>>() {}.type
 var PATH = "src/main/kotlin/assets/intensity_son.json"
 val couchbaseUtil: CouchbaseUtil by lazy { CouchbaseUtil() }
 val segmentRepository by lazy { SegmentRepository() }
@@ -80,10 +80,6 @@ fun createIntensityMock() {
     }
     println("prune edilen kayit sayisi: ${preCount - response.intensityList.size}")
 
-
-
-
-
     FileWriter("intensity_unique_response.json").use { writer ->
         GsonBuilder().create().toJson(response, writer)
     }
@@ -118,7 +114,7 @@ fun createDBFromRest() {
 }
 
 
-fun createDBByZoomLevel(segmentList: Array<SegmentData>) {
+fun createDBByZoomLevel(segmentList: Array<SegmentDataIn>) {
     val zoomLevels = arrayOf(SegmentMap(), SegmentMap(), SegmentMap())
     for (i in segmentList) {
         if (i.roadType == 1010 || i.roadType == 1020 || i.roadType == 1030 || i.roadType == 1040) {
@@ -139,7 +135,7 @@ fun createDBByZoomLevel(segmentList: Array<SegmentData>) {
 }
 
 //1000 and 1070 are not include
-private fun createDBByRoadType(segmentList: Array<SegmentData>) {
+private fun createDBByRoadType(segmentList: Array<SegmentDataIn>) {
     val segmentMap = SegmentMap()
     for (i in segmentList) {
         if (i.roadType == 1000) continue
@@ -163,7 +159,7 @@ private fun addToCouchbaseLiteByRoadType(roadTypeIndex: Int, segmentMap: Segment
 
 }
 
-private fun createDBAllInOneDocument(segmentList: Array<SegmentData>?) {
+private fun createDBAllInOneDocument(segmentList: Array<SegmentDataIn>?) {
     val segmentMap = SegmentMap()
     for (i in segmentList!!) {
         if (i.roadType == 1000 || i.roadType == 1070) continue
@@ -177,7 +173,7 @@ private fun createDBAllInOneDocument(segmentList: Array<SegmentData>?) {
 private fun createDBViaLocalPath() {
     val inputStream = FileInputStream(File(PATH))
     val streamReader = InputStreamReader(inputStream, Charsets.UTF_8)
-    val segmentList: Array<SegmentData> = Gson().fromJson(JsonReader(streamReader), segmentListToken)
+    val segmentList: Array<SegmentDataIn> = Gson().fromJson(JsonReader(streamReader), segmentListToken)
 
     for (i in segmentList) {
         println("${i.segmentId} eklendi")
@@ -189,7 +185,7 @@ private fun createDBViaLocalPath() {
 private fun createDBForMapViaLocalPath() {
     val inputStream = FileInputStream(File(PATH))
     val streamReader = InputStreamReader(inputStream, Charsets.UTF_8)
-    val segmentList: Array<SegmentData> = Gson().fromJson(JsonReader(streamReader), segmentListToken)
+    val segmentList: Array<SegmentDataIn> = Gson().fromJson(JsonReader(streamReader), segmentListToken)
 
     val segmentMap = SegmentMap()
     for (i in segmentList) {
