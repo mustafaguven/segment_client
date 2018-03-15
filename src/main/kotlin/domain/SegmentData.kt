@@ -6,9 +6,12 @@ import java.io.Serializable
 
 data class SegmentData(
         @SerializedName("FCDSegmentId") val segmentId: Int = 0,
-        @SerializedName("Coords") var coordinates: String = "",
-        @SerializedName("Action") val action: String = "",
-        @SerializedName("FCDProviderId") val providerId: Int = 0) : Serializable {
+        @SerializedName("RoadType") var roadType: Int = 0,
+        @SerializedName("Coords") var coordinates: String = ""
+        //,
+        //@SerializedName("Action") val action: String = "",
+        //@SerializedName("FCDProviderId") val providerId: Int = 0
+        ) : Serializable {
 
 /*
     companion object {

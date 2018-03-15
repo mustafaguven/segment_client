@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonReader
 import couchbase.CouchbaseUtil
 import domain.SegmentData
 import domain.SegmentMap
+import file.FileUtil
 import network.SegmentRepository
 import java.io.File
 import java.io.FileInputStream
@@ -15,6 +16,9 @@ private val segmentListToken = object : TypeToken<Array<SegmentData>>() {}.type
 var PATH = "src/entry.main/assets/segments.json"
 val couchbaseUtil: CouchbaseUtil by lazy { CouchbaseUtil() }
 val segmentRepository by lazy { SegmentRepository() }
+val fileUtil by lazy { FileUtil() }
+
+val addedRoadTypes = mutableListOf<Int>()
 
 fun main(args: Array<String>) {
     if (args.isNotEmpty()) {
@@ -36,17 +40,39 @@ fun main(args: Array<String>) {
 }
 
 fun createDBFromRest() {
+
+    addedRoadTypes.clear()
+    fileUtil.deleteDataFolder()
+
     println("Segment Datasi cekiliyor")
     val segmentList = segmentRepository.getSegments()
     println("Segment datasi alindi, map e ceviriliyor")
+
+    segmentList!!.sortBy { it.roadType }
+    println("RoadType'a gore yeniden siralandi")
+
     val segmentMap = SegmentMap()
-    for (i in segmentList!!) {
+    for (i in segmentList) {
+        if (!addedRoadTypes.contains(i.roadType)) {
+            addedRoadTypes.add(i.roadType)
+
+            if (addedRoadTypes.size > 1) {
+                addToCouchbaseLiteByRoadType(addedRoadTypes.size - 2, segmentMap)
+            }
+        }
         segmentMap[i.segmentId] = i
     }
-    println("Segment map database'e kaydediliyor")
-    couchbaseUtil.upsertSegmentMapDocument(segmentMap)
+
+    addToCouchbaseLiteByRoadType(addedRoadTypes.size - 1, segmentMap)
+
     println("Islem tamamlandi")
     System.exit(0)
+}
+
+private fun addToCouchbaseLiteByRoadType(roadTypeIndex: Int, segmentMap: SegmentMap) {
+    couchbaseUtil.upsertSegmentDocument(addedRoadTypes[roadTypeIndex], segmentMap)
+    println("${addedRoadTypes[roadTypeIndex]} nolu roadType dokumanina ${segmentMap.size} adet segment eklendi")
+    segmentMap.clear()
 }
 
 
@@ -73,7 +99,7 @@ private fun createDBForMapViaLocalPath() {
         segmentMap[i.segmentId] = i
     }
 
-    couchbaseUtil.upsertSegmentMapDocument(segmentMap)
+    couchbaseUtil.upsertSegmentDocument(1, segmentMap)
 
 }
 

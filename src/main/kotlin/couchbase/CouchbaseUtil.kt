@@ -53,9 +53,9 @@ class CouchbaseUtil {
         upsertDocument(props as MutableMap<String, Any>, payload.segmentId.toString())
     }
 
-    fun upsertSegmentMapDocument(payload: SegmentMap) {
+    fun upsertSegmentDocument(documentId: Int, payload: SegmentMap) {
         val props = objectMapper.convertValue(payload, Map::class.java)
-        upsertDocument(props as MutableMap<String, Any>, "1")
+        upsertDocument(props as MutableMap<String, Any>, documentId.toString())
     }
 
 }
