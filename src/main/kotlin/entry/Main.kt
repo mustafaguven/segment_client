@@ -19,7 +19,7 @@ val segmentRepository by lazy { SegmentRepository() }
 val fileUtil by lazy { FileUtil() }
 
 val addedRoadTypes = mutableListOf<Int>()
-var creationType: CreationType = CreationType.BY_ROAD_TYPE
+var creationType: CreationType = CreationType.BY_ZOOM_LEVEL
 
 fun main(args: Array<String>) {
     if (args.isNotEmpty()) {
@@ -61,53 +61,49 @@ fun createDBFromRest() {
     segmentList!!.sortBy { it.roadType }
     println("RoadType'a gore yeniden siralandi")
 
+/*    var j = 0
+    for (i in segmentList){
+        if(i.roadType == 1000) j++
+
+    }
+    println("$j adet 1000 kayit")*/
+
     when (creationType) {
         CreationType.BY_ROAD_TYPE -> createDBByRoadType(segmentList)
-    //CreationType.BY_ZOOM_LEVEL -> createDBByZoomLevel(segmentList)
+        CreationType.BY_ZOOM_LEVEL -> createDBByZoomLevel(segmentList)
     }
 
     println("Islem tamamlandi")
     System.exit(0)
 }
 
-/*
+
 fun createDBByZoomLevel(segmentList: Array<SegmentData>) {
-    val addedZoomLevel = mutableListOf<Int>()
-
-
-    val segmentMap = SegmentMap()
+    val zoomLevels = arrayOf(SegmentMap(), SegmentMap(), SegmentMap())
     for (i in segmentList) {
-        if (!addedZoomLevel.contains(getZoomLevel(i.roadType))) {
-            addedZoomLevel.add(getZoomLevel(i.roadType))
-
-            if (addedZoomLevel.size > 1) {
-                couchbaseUtil.upsertSegmentDocument(addedZoomLevel[addedZoomLevel.size - 2], segmentMap)
-                println("${addedZoomLevel[addedZoomLevel.size - 2]} nolu zoom level dokumanina ${segmentMap.size} adet segment eklendi")
-                segmentMap.clear()
-            }
+        if (i.roadType == 1010 || i.roadType == 1020 || i.roadType == 1030 || i.roadType == 1040) {
+            zoomLevels[0][i.segmentId] = i
+        } else if (i.roadType == 1050) {
+            zoomLevels[1][i.segmentId] = i
+        } else if (i.roadType == 1060) {
+            zoomLevels[2][i.segmentId] = i
         }
-        segmentMap[i.segmentId] = i
     }
+
+    couchbaseUtil.upsertSegmentDocument(1, zoomLevels[0])
+    println("1 nolu zoomLevela ${zoomLevels[0].size} adet segment eklendi")
+    couchbaseUtil.upsertSegmentDocument(2, zoomLevels[1])
+    println("2 nolu zoomLevela ${zoomLevels[1].size} adet segment eklendi")
+    couchbaseUtil.upsertSegmentDocument(3, zoomLevels[2])
+    println("3 nolu zoomLevela ${zoomLevels[2].size} adet segment eklendi")
 }
 
-fun getZoomLevel(roadType: Int): Int {
-    return if (roadType == 1010 || roadType == 1020 || roadType == 1030 || roadType == 1040) {
-        1
-    } else if (roadType == 1040 || roadType == 1050) {
-        2
-    } else if (roadType == 1050 || roadType == 1060) {
-        3
-    } else {
-        0
-    }
-}
-*/
 
 //1000 and 1070 are not include
 private fun createDBByRoadType(segmentList: Array<SegmentData>) {
     val segmentMap = SegmentMap()
     for (i in segmentList) {
-        if(i.roadType == 1000) continue
+        if (i.roadType == 1000) continue
 
         if (!addedRoadTypes.contains(i.roadType)) {
             addedRoadTypes.add(i.roadType)
